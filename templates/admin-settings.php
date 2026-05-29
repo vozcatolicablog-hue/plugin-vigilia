@@ -52,7 +52,7 @@ if (!defined('ABSPATH')) {
                     <?php esc_html_e('Color principal', '40-horas-oracion'); ?>
                 </label>
                 <input type="color" id="horas_oracion_primary_color" name="horas_oracion_primary_color" 
-                       value="<?php echo esc_attr($primary_color); ?>" />
+                       value="<?php echo esc_attr($primary_color); ?>" style="width: 60px; height: 40px; padding: 2px; cursor: pointer; border-radius: 4px;" />
                 <p class="description">
                     <?php esc_html_e('Elige el color para los elementos principales del sitio.', '40-horas-oracion'); ?>
                 </p>
