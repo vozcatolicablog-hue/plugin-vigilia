@@ -46,6 +46,14 @@ class Cron {
     }
     
     /**
+     * Initialize cron hooks (if any additional needed)
+     */
+    public function init() {
+        // Hooks are already registered in constructor, but this method
+        // is required by Plugin::init_components()
+    }
+    
+    /**
      * Schedule monthly reset
      */
     public function schedule_monthly_reset() {
