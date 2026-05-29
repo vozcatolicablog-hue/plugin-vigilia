@@ -25,7 +25,7 @@
      * Populate hours select dropdown
      */
     function populateHours() {
-        const hoursSelect = $('#horas_oracion_numero_hora');
+        const hoursSelect = $('#ho_numero_hora');
         
         if (hoursSelect.length === 0) {
             return;
@@ -74,7 +74,7 @@
      * Bind form events
      */
     function bindFormEvents() {
-        const form = $('#horas_oracion_form');
+        const form = $('#horas-oracion-form');
         
         if (form.length === 0) {
             return;
@@ -92,7 +92,7 @@
      */
     function submitForm(form) {
         const submitBtn = form.find('button[type="submit"]');
-        const messageContainer = $('#horas_oracion_message');
+        const messageContainer = $('.form-message');
         
         // Clear previous messages
         messageContainer.html('');
