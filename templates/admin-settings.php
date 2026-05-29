@@ -155,7 +155,7 @@ if (!defined('ABSPATH')) {
             <div class="form-field">
                 <label class="checkbox-label">
                     <input type="checkbox" name="horas_oracion_allow_multiple_per_hour" value="1" 
-                           <?php checked($allow_multiple, 1); ?> />
+                           <?php checked($allow_multiple_per_hour, 1); ?> />
                     <?php esc_html_e('Permitir múltiples personas por hora', '40-horas-oracion'); ?>
                 </label>
                 <p class="description">
