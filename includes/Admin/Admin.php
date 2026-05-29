@@ -276,37 +276,37 @@ class Admin {
      */
     private function save_settings() {
         // Intro text
-        $intro_text = isset($_POST['intro_text']) ? sanitize_textarea_field($_POST['intro_text']) : '';
+        $intro_text = isset($_POST['horas_oracion_intro_text']) ? sanitize_textarea_field($_POST['horas_oracion_intro_text']) : '';
         update_option('horas_oracion_intro_text', $intro_text);
         
         // Primary color
-        $primary_color = isset($_POST['primary_color']) ? sanitize_hex_color($_POST['primary_color']) : '#3b82f6';
+        $primary_color = isset($_POST['horas_oracion_primary_color']) ? sanitize_hex_color($_POST['horas_oracion_primary_color']) : '#3b82f6';
         update_option('horas_oracion_primary_color', $primary_color);
         
         // Allow multiple per hour
-        $allow_multiple = isset($_POST['allow_multiple_per_hour']) ? '1' : '0';
+        $allow_multiple = isset($_POST['horas_oracion_allow_multiple_per_hour']) ? '1' : '0';
         update_option('horas_oracion_allow_multiple_per_hour', $allow_multiple);
         
         // Max per hour
-        $max_per_hour = isset($_POST['max_per_hour']) ? absint($_POST['max_per_hour']) : 0;
+        $max_per_hour = isset($_POST['horas_oracion_max_per_hour']) ? absint($_POST['horas_oracion_max_per_hour']) : 0;
         update_option('horas_oracion_max_per_hour', $max_per_hour);
         
         // Historical count
-        $historical_count = isset($_POST['historical_count']) ? absint($_POST['historical_count']) : 13965;
+        $historical_count = isset($_POST['horas_oracion_historical_count']) ? absint($_POST['horas_oracion_historical_count']) : 13965;
         update_option('horas_oracion_historical_count', $historical_count);
         
         // reCAPTCHA
-        $recaptcha_site_key = isset($_POST['recaptcha_site_key']) ? sanitize_text_field($_POST['recaptcha_site_key']) : '';
+        $recaptcha_site_key = isset($_POST['horas_oracion_recaptcha_site_key']) ? sanitize_text_field($_POST['horas_oracion_recaptcha_site_key']) : '';
         update_option('horas_oracion_recaptcha_site_key', $recaptcha_site_key);
         
-        $recaptcha_secret_key = isset($_POST['recaptcha_secret_key']) ? sanitize_text_field($_POST['recaptcha_secret_key']) : '';
+        $recaptcha_secret_key = isset($_POST['horas_oracion_recaptcha_secret_key']) ? sanitize_text_field($_POST['horas_oracion_recaptcha_secret_key']) : '';
         update_option('horas_oracion_recaptcha_secret_key', $recaptcha_secret_key);
         
         // Turnstile
-        $turnstile_site_key = isset($_POST['turnstile_site_key']) ? sanitize_text_field($_POST['turnstile_site_key']) : '';
+        $turnstile_site_key = isset($_POST['horas_oracion_turnstile_site_key']) ? sanitize_text_field($_POST['horas_oracion_turnstile_site_key']) : '';
         update_option('horas_oracion_turnstile_site_key', $turnstile_site_key);
         
-        $turnstile_secret_key = isset($_POST['turnstile_secret_key']) ? sanitize_text_field($_POST['turnstile_secret_key']) : '';
+        $turnstile_secret_key = isset($_POST['horas_oracion_turnstile_secret_key']) ? sanitize_text_field($_POST['horas_oracion_turnstile_secret_key']) : '';
         update_option('horas_oracion_turnstile_secret_key', $turnstile_secret_key);
         
         // Dynamic schedule
