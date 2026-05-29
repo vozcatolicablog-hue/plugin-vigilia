@@ -155,6 +155,10 @@
         if (window.location.search.indexOf('exported=1') !== -1) {
             showAdminNotice('CSV exportado correctamente.', 'success');
         }
+
+        if (window.location.search.indexOf('error=1') !== -1) {
+            showAdminNotice('Error al procesar la solicitud.', 'error');
+        }
     }
 
 })(jQuery);

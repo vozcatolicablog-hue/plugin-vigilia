@@ -33,12 +33,6 @@ class Admin {
     public function __construct(Database $database, Security $security) {
         $this->database = $database;
         $this->security = $security;
-        
-        add_action('admin_menu', [$this, 'add_admin_menu']);
-        add_action('admin_init', [$this, 'register_settings']);
-        add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
-        add_action('wp_ajax_horas_oracion_delete_registration', [$this, 'delete_registration_ajax']);
-        add_action('wp_ajax_horas_oracion_export_month_csv', [$this, 'export_month_csv_ajax']);
     }
     
     /**
@@ -46,13 +40,20 @@ class Admin {
      */
     public function init() {
         // Add admin menu
-        add_action('admin_menu', [$this, 'register_admin_menu']);
+        add_action('admin_menu', [$this, 'add_admin_menu']);
+        
+        // Settings registration
+        add_action('admin_init', [$this, 'register_settings']);
+        
+        // Handle admin actions (e.g. settings save, delete, export)
+        add_action('admin_init', [$this, 'handle_admin_actions']);
         
         // Enqueue admin assets
         add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
         
-        // Handle admin actions
-        add_action('admin_init', [$this, 'handle_admin_actions']);
+        // AJAX handlers
+        add_action('wp_ajax_horas_oracion_delete_registration', [$this, 'delete_registration_ajax']);
+        add_action('wp_ajax_horas_oracion_export_month_csv', [$this, 'export_month_csv_ajax']);
     }
     
     /**
@@ -139,6 +140,7 @@ class Admin {
         wp_localize_script('horas-oracion-admin', 'horasOracionAdmin', [
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce' => $this->security->create_nonce('horas_oracion_admin_nonce'),
+            'confirmDelete' => __('¿Está seguro de que desea eliminar esta inscripción?', '40-horas-oracion'),
         ]);
     }
     
@@ -175,6 +177,33 @@ class Admin {
             }
             
             $this->save_settings();
+        }
+        
+        // Export month CSV (Manual Form POST)
+        if (isset($_POST['horas_oracion_export_month'])) {
+            if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'export_csv')) {
+                wp_die('Error de seguridad');
+            }
+            
+            $export_month = isset($_POST['export_month']) ? sanitize_text_field($_POST['export_month']) : '';
+            if (!empty($export_month)) {
+                $parts = explode('-', $export_month);
+                if (count($parts) === 2) {
+                    $year = $parts[0];
+                    $month = $parts[1];
+                    
+                    $export = new Export($this->database);
+                    $result = $export->export_month_by_date("$month/$year");
+                    
+                    if ($result !== false) {
+                        wp_redirect(admin_url('admin.php?page=horas-oracion-exports&exported=1'));
+                        exit;
+                    }
+                }
+            }
+            
+            wp_redirect(admin_url('admin.php?page=horas-oracion-exports&error=1'));
+            exit;
         }
     }
     
@@ -345,5 +374,85 @@ class Admin {
         
         fclose($output);
         exit;
+    }
+    
+    /**
+     * Delete registration via AJAX
+     */
+    public function delete_registration_ajax() {
+        // Verify nonce
+        if (!isset($_POST['nonce']) || !$this->security->verify_nonce($_POST['nonce'], 'horas_oracion_admin_nonce')) {
+            wp_send_json_error([
+                'message' => 'Error de seguridad. Por favor recargue la página.'
+            ]);
+        }
+        
+        // Check capabilities
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error([
+                'message' => 'No tiene permisos suficientes para realizar esta acción.'
+            ]);
+        }
+        
+        // Get registration ID
+        $id = isset($_POST['registration_id']) ? absint($_POST['registration_id']) : 0;
+        if (!$id) {
+            wp_send_json_error([
+                'message' => 'ID de registro inválido.'
+            ]);
+        }
+        
+        // Delete registration
+        $result = $this->database->delete_registration($id);
+        if ($result === false) {
+            wp_send_json_error([
+                'message' => 'No se pudo eliminar el registro.'
+            ]);
+        }
+        
+        wp_send_json_success([
+            'message' => 'Registro eliminado correctamente.'
+        ]);
+    }
+    
+    /**
+     * Export month CSV via AJAX
+     */
+    public function export_month_csv_ajax() {
+        // Verify nonce
+        if (!isset($_POST['nonce']) || !$this->security->verify_nonce($_POST['nonce'], 'horas_oracion_admin_nonce')) {
+            wp_send_json_error([
+                'message' => 'Error de seguridad. Por favor recargue la página.'
+            ]);
+        }
+        
+        // Check capabilities
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error([
+                'message' => 'No tiene permisos suficientes para realizar esta acción.'
+            ]);
+        }
+        
+        $month_str = isset($_POST['month']) ? sanitize_text_field($_POST['month']) : '';
+        if (empty($month_str)) {
+            wp_send_json_error([
+                'message' => 'Mes no especificado.'
+            ]);
+        }
+        
+        // Month expected in MM/YYYY format
+        $export = new Export($this->database);
+        $result = $export->export_month_by_date($month_str);
+        
+        if ($result === false) {
+            wp_send_json_error([
+                'message' => 'No se pudo exportar el archivo CSV.'
+            ]);
+        }
+        
+        wp_send_json_success([
+            'message' => 'Archivo exportado correctamente.',
+            'file' => $result
+        ]);
     }
 }
