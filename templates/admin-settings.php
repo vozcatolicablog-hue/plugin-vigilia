@@ -66,7 +66,10 @@ if (!defined('ABSPATH')) {
 
             <p><?php esc_html_e('Elige uno de los siguientes servicios de CAPTCHA. Ambos son gratuitos.', '40-horas-oracion'); ?></p>
 
-            <h3><?php esc_html_e('Google reCAPTCHA v2', '40-horas-oracion'); ?></h3>
+            <h3><?php esc_html_e('Google reCAPTCHA v2 (Casilla "No soy un robot")', '40-horas-oracion'); ?></h3>
+            <p style="color: #d63638; font-weight: 500;">
+                <?php esc_html_e('IMPORTANTE: Debes crear claves específicas para "reCAPTCHA v2 -> Casilla de verificación". Las claves de la versión 3 darán un error "tipo de clave no válido".', '40-horas-oracion'); ?>
+            </p>
             <div class="form-field">
                 <label for="horas_oracion_recaptcha_site_key">
                     <?php esc_html_e('Clave del sitio', '40-horas-oracion'); ?>

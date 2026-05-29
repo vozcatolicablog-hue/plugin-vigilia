@@ -21,14 +21,14 @@
      * Bind form events
      */
     function bindFormEvents() {
-        var form = $('#horas-oracion-form');
+        var forms = $('.horas-oracion-form');
         
-        if (form.length === 0) {
+        if (forms.length === 0) {
             return;
         }
 
         // Form submission
-        form.on('submit', function(e) {
+        forms.on('submit', function(e) {
             e.preventDefault();
             submitForm($(this));
         });
@@ -73,13 +73,15 @@
         };
 
         // Add reCAPTCHA if present
-        if ($('#g-recaptcha-response').length > 0) {
-            formData.recaptcha_token = $('#g-recaptcha-response').val();
+        var recaptchaResponse = form.find('[name="g-recaptcha-response"]');
+        if (recaptchaResponse.length > 0) {
+            formData.recaptcha_token = recaptchaResponse.val();
         }
 
         // Add Turnstile if present
-        if ($('[name="cf-turnstile-response"]').length > 0) {
-            formData.turnstile_token = $('[name="cf-turnstile-response"]').val();
+        var turnstileResponse = form.find('[name="cf-turnstile-response"]');
+        if (turnstileResponse.length > 0) {
+            formData.turnstile_token = turnstileResponse.val();
         }
 
         // Send AJAX request
