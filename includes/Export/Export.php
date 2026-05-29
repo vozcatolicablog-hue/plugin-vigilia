@@ -28,6 +28,13 @@ class Export {
     }
     
     /**
+     * Initialize export hooks (if any)
+     */
+    public function init() {
+        // No direct hooks needed, called by admin and cron
+    }
+    
+    /**
      * Export current month to CSV
      */
     public function export_current_month() {
