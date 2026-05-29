@@ -110,37 +110,64 @@ class Cron {
         
         $cycle_month = date('m/Y', strtotime($oldest));
         
-        do_action('horas_oracion_before_monthly_reset', $cycle_month);
+        do_action('horas_oracion_before_monthly_reset');
         
-        // Export ALL data (not filtered by month) to ensure nothing is lost
-        $export_result = $this->export->export_all_current_data($cycle_month);
+        // Get all distinct months present in the data
+        $months = $wpdb->get_results(
+            "SELECT DISTINCT MONTH(created_at) AS m, YEAR(created_at) AS y 
+             FROM $table_name 
+             ORDER BY y ASC, m ASC"
+        );
         
-        // CRITICAL: Only truncate if export was successful
-        if (!$export_result) {
-            error_log('[40 Horas Oración] CRITICAL: Export FAILED for cycle ' . $cycle_month . '. Data was NOT deleted to prevent data loss.');
+        if (empty($months)) {
+            return;
+        }
+        
+        // Export each month separately (one CSV per month)
+        $all_exports_ok = true;
+        $exported_files = [];
+        
+        foreach ($months as $period) {
+            $month_label = sprintf('%02d/%d', $period->m, $period->y);
+            $export_result = $this->export->export_month_by_date($month_label);
+            
+            if (!$export_result) {
+                $all_exports_ok = false;
+                error_log('[40 Horas Oración] Export FAILED for month: ' . $month_label);
+                break;
+            }
+            
+            // Verify the file exists and has content
+            if (!isset($export_result['path']) || !file_exists($export_result['path']) || filesize($export_result['path']) <= 50) {
+                $all_exports_ok = false;
+                error_log('[40 Horas Oración] Export file verification failed for month: ' . $month_label);
+                break;
+            }
+            
+            $exported_files[] = $export_result['filename'];
+        }
+        
+        // CRITICAL: Only truncate if ALL exports were successful
+        if (!$all_exports_ok) {
+            error_log('[40 Horas Oración] CRITICAL: One or more exports failed. Data was NOT deleted to prevent data loss.');
             
             // Notify admin via email
             $admin_email = get_option('admin_email');
             wp_mail(
                 $admin_email,
                 '[40 Horas Oración] Error en exportación automática',
-                'La exportación automática del ciclo ' . $cycle_month . ' ha fallado. Los datos NO fueron eliminados para prevenir pérdida de datos. Por favor revise los archivos de exportación y realice una exportación manual desde el panel de administración.'
+                'La exportación automática ha fallado para uno o más meses. Los datos NO fueron eliminados para prevenir pérdida de datos. Por favor revise los archivos de exportación y realice una exportación manual desde el panel de administración.'
             );
             
             return; // DO NOT truncate
         }
         
-        // Verify the exported file exists and has data
-        if (isset($export_result['path']) && file_exists($export_result['path']) && filesize($export_result['path']) > 50) {
-            // Safe to truncate
-            $wpdb->query("TRUNCATE TABLE $table_name");
-            
-            do_action('horas_oracion_after_monthly_reset', $cycle_month);
-            
-            error_log('[40 Horas Oración] Monthly reset completed successfully for cycle: ' . $cycle_month . '. Export: ' . $export_result['filename']);
-        } else {
-            error_log('[40 Horas Oración] CRITICAL: Export file verification failed for cycle ' . $cycle_month . '. Data was NOT deleted.');
-        }
+        // All exports OK - safe to truncate
+        $wpdb->query("TRUNCATE TABLE $table_name");
+        
+        do_action('horas_oracion_after_monthly_reset');
+        
+        error_log('[40 Horas Oración] Monthly reset completed. Exported files: ' . implode(', ', $exported_files));
     }
     
     /**
