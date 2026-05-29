@@ -57,6 +57,29 @@ class Export {
     }
     
     /**
+     * Export ALL current data in the table (used before automatic reset)
+     * This ensures no data is lost regardless of date filtering
+     * 
+     * @param string $cycle_label Label for the cycle (e.g. "05/2026")
+     * @return array|false Export result or false on failure
+     */
+    public function export_all_current_data($cycle_label) {
+        global $wpdb;
+        $table_name = $this->database->get_table_name();
+        
+        // Get ALL registrations without any date filter
+        $registrations = $wpdb->get_results(
+            "SELECT * FROM $table_name ORDER BY numero_hora ASC, created_at ASC"
+        );
+        
+        // Generate filename with cycle label and timestamp for uniqueness
+        $safe_label = str_replace('/', '-', $cycle_label);
+        $filename = sprintf('40-horas-oracion-ciclo-%s-backup-%s.csv', $safe_label, date('Ymd-His'));
+        
+        return $this->generate_csv($registrations, $filename);
+    }
+    
+    /**
      * Generate CSV file
      */
     private function generate_csv($registrations, $filename) {

@@ -78,47 +78,69 @@ class Cron {
         $duration_hours = (int) get_option('horas_oracion_duration_hours', 40);
         $reset_days = (int) get_option('horas_oracion_reset_days', 2);
         
-        // Calculate the reset day
+        // Calculate the reset date (full date, not just day)
         $current_year = date('Y');
         $current_month = date('m');
         $vigil_start = strtotime("$current_year-$current_month-" . sprintf('%02d', $start_day) . " $start_time");
         $vigil_end = $vigil_start + ($duration_hours * 3600);
         $reset_timestamp = $vigil_end + ($reset_days * 86400);
         
-        $reset_day = date('d', $reset_timestamp);
+        // Compare full date (Y-m-d) not just day number to avoid cross-month issues
+        $reset_date = date('Y-m-d', $reset_timestamp);
+        $today = date('Y-m-d');
         
-        // Check if today is the reset day
-        if (date('d') !== $reset_day) {
+        if ($today !== $reset_date) {
             return;
         }
         
         global $wpdb;
         $table_name = $this->database->get_table_name();
         
+        // Check if there is any data to reset
+        $count = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
+        if (!$count || $count == 0) {
+            return; // No data to reset
+        }
+        
         // Find the earliest record to determine the cycle month
         $oldest = $wpdb->get_var("SELECT MIN(created_at) FROM $table_name");
         if (!$oldest) {
-            return; // No data to reset
+            return;
         }
         
         $cycle_month = date('m/Y', strtotime($oldest));
         
         do_action('horas_oracion_before_monthly_reset', $cycle_month);
         
-        // Export data for the cycle
-        $export_result = $this->export->export_month_by_date($cycle_month);
+        // Export ALL data (not filtered by month) to ensure nothing is lost
+        $export_result = $this->export->export_all_current_data($cycle_month);
         
+        // CRITICAL: Only truncate if export was successful
         if (!$export_result) {
-            error_log('Error exporting data for cycle: ' . $cycle_month);
+            error_log('[40 Horas Oración] CRITICAL: Export FAILED for cycle ' . $cycle_month . '. Data was NOT deleted to prevent data loss.');
+            
+            // Notify admin via email
+            $admin_email = get_option('admin_email');
+            wp_mail(
+                $admin_email,
+                '[40 Horas Oración] Error en exportación automática',
+                'La exportación automática del ciclo ' . $cycle_month . ' ha fallado. Los datos NO fueron eliminados para prevenir pérdida de datos. Por favor revise los archivos de exportación y realice una exportación manual desde el panel de administración.'
+            );
+            
+            return; // DO NOT truncate
         }
         
-        // Vaciar la tabla activa
-        $wpdb->query("TRUNCATE TABLE $table_name");
-        
-        do_action('horas_oracion_after_monthly_reset', $cycle_month);
-        
-        // Log the action
-        error_log('Monthly reset completed for cycle: ' . $cycle_month);
+        // Verify the exported file exists and has data
+        if (isset($export_result['path']) && file_exists($export_result['path']) && filesize($export_result['path']) > 50) {
+            // Safe to truncate
+            $wpdb->query("TRUNCATE TABLE $table_name");
+            
+            do_action('horas_oracion_after_monthly_reset', $cycle_month);
+            
+            error_log('[40 Horas Oración] Monthly reset completed successfully for cycle: ' . $cycle_month . '. Export: ' . $export_result['filename']);
+        } else {
+            error_log('[40 Horas Oración] CRITICAL: Export file verification failed for cycle ' . $cycle_month . '. Data was NOT deleted.');
+        }
     }
     
     /**
