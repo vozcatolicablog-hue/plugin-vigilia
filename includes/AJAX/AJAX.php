@@ -171,11 +171,17 @@ class AJAX {
         foreach ($registrations as $hour_group) {
             $participants = [];
             foreach ($hour_group['participants'] as $participant) {
+                $created_at_formatted = '';
+                if (isset($participant->created_at)) {
+                    $created_at_formatted = wp_date('d \d\e F \d\e Y - H:i', strtotime($participant->created_at));
+                }
+                
                 $participants[] = [
                     'nombre' => $this->security->esc($participant->nombre),
                     'apellido' => $this->security->esc($participant->apellido),
                     'ciudad' => $this->security->esc($participant->ciudad),
-                    'pais' => $this->security->esc($participant->pais)
+                    'pais' => $this->security->esc($participant->pais),
+                    'created_at' => $created_at_formatted
                 ];
             }
             

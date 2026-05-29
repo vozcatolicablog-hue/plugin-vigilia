@@ -117,7 +117,7 @@
             },
             complete: function() {
                 submitBtn.prop('disabled', false);
-                submitBtn.html('Inscribirme');
+                submitBtn.html('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg> Inscribirme');
             }
         });
     }
@@ -148,34 +148,35 @@
                     }
                     
                     // 2. Reconstruir la tabla de participantes si existe
-                    if ($('.horas-oracion-table-wrapper').length > 0) {
+                    if ($('.table-body').length > 0) {
                         var scheduleHtml = '';
                         
                         $.each(data.registrations, function(index, hourGroup) {
-                            scheduleHtml += '<div class="horas-oracion-hours-group">';
-                            scheduleHtml += '<div class="horas-oracion-hours-group-header">';
-                            var monthName = horasOracion.currentMonth || '';
-                            scheduleHtml += '<h4>Hora ' + hourGroup.numero_hora + ' — Día ' + hourGroup.dia + (monthName ? ' de ' + monthName : '') + ' — ' + hourGroup.hora + '</h4>';
+                            scheduleHtml += '<div class="ho-hour-row">';
+                            scheduleHtml += '<div class="ho-hour-header">';
+                            scheduleHtml += '<h4>Hora ' + hourGroup.numero_hora + ' — Día ' + hourGroup.dia + ' — ' + hourGroup.hora + '</h4>';
                             scheduleHtml += '</div>';
                             
-                            scheduleHtml += '<ul class="horas-oracion-participants-list">';
-                            
                             if (hourGroup.participants && hourGroup.participants.length > 0) {
+                                scheduleHtml += '<ul class="ho-participants-list">';
                                 $.each(hourGroup.participants, function(i, participant) {
                                     scheduleHtml += '<li>';
-                                    scheduleHtml += '<span class="horas-oracion-participant-single-line">' + participant.nombre + ' ' + participant.apellido + ' - ' + participant.ciudad + ', ' + participant.pais + '</span>';
+                                    scheduleHtml += '<div class="ho-p-name">';
+                                    scheduleHtml += '<div class="p-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>';
+                                    scheduleHtml += '<span>' + participant.nombre + ' ' + participant.apellido + '</span>';
+                                    scheduleHtml += '</div>';
+                                    scheduleHtml += '<div class="ho-p-location">' + participant.ciudad + ', ' + participant.pais + '</div>';
+                                    var dateStr = participant.created_at ? participant.created_at : '';
+                                    scheduleHtml += '<div class="ho-p-date">' + dateStr + '</div>';
                                     scheduleHtml += '</li>';
                                 });
-                            } else {
-                                scheduleHtml += '<li class="horas-oracion-empty-state"><p>Aún no hay inscritos en este horario.</p></li>';
+                                scheduleHtml += '</ul>';
                             }
-                            
-                            scheduleHtml += '</ul></div>';
+                            scheduleHtml += '</div>';
                         });
                         
                         // Reemplazar todo el contenido del contenedor de la tabla
-                        // Seleccionamos el div que contiene todos los groups
-                        $('.horas-oracion-table-wrapper > div:last-child').html(scheduleHtml);
+                        $('.table-body').html(scheduleHtml);
                     }
                 }
             },

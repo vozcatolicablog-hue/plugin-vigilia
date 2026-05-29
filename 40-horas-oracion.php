@@ -3,7 +3,7 @@
  * Plugin Name: 40 Horas de Oración
  * Plugin URI: https://example.com
  * Description: Sistema de inscripción para 40 horas de oración continua por la santidad y perseverancia de los religiosos y el aumento de las vocaciones.
- * Version: 1.6.0
+ * Version: 1.7.0
  * Author: Your Name
  * Author URI: https://example.com
  * Text Domain: 40-horas-oracion
@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('HORAS_ORACION_VERSION', '1.6.0');
+define('HORAS_ORACION_VERSION', '1.7.0');
 define('HORAS_ORACION_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('HORAS_ORACION_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('HORAS_ORACION_PLUGIN_BASENAME', plugin_basename(__FILE__));
