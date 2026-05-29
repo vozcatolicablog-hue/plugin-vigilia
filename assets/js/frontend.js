@@ -109,8 +109,8 @@
 
         // Prepare data
         const formData = {
-            action: 'horas_oracion_submit_form',
-            nonce: horasOracionFrontend.nonce,
+            action: 'horas_oracion_submit_registration',
+            nonce: horasOracion.nonce,
             nombre: form.find('[name="nombre"]').val(),
             apellido: form.find('[name="apellido"]').val(),
             ciudad: form.find('[name="ciudad"]').val(),
@@ -130,7 +130,7 @@
 
         // Send AJAX request
         $.ajax({
-            url: horasOracionFrontend.ajaxUrl,
+            url: horasOracion.ajaxUrl,
             type: 'POST',
             data: formData,
             dataType: 'json',
@@ -189,6 +189,11 @@
 
             // Update counters
             updateCounters();
+            
+            // Reload page to show new data
+            setTimeout(function() {
+                window.location.reload();
+            }, 2000);
         } else {
             showMessage(
                 '✗ ' + response.data.message,
@@ -214,45 +219,14 @@
      * Refresh table
      */
     function refreshTable() {
-        const table = $('#horas_oracion_table');
-        
-        if (table.length === 0) {
-            return;
-        }
-
-        $.ajax({
-            url: horasOracionFrontend.ajaxUrl,
-            type: 'POST',
-            data: {
-                action: 'horas_oracion_get_table',
-                nonce: horasOracionFrontend.nonce
-            },
-            dataType: 'html',
-            success: function(response) {
-                table.html(response);
-            }
-        });
+        // Data refresh will happen via page reload
     }
 
     /**
      * Update counters
      */
     function updateCounters() {
-        $.ajax({
-            url: horasOracionFrontend.ajaxUrl,
-            type: 'POST',
-            data: {
-                action: 'horas_oracion_get_counters',
-                nonce: horasOracionFrontend.nonce
-            },
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    $('#horas_oracion_monthly_counter').text(response.data.monthly_count);
-                    $('#horas_oracion_historical_counter').text(response.data.historical_count);
-                }
-            }
-        });
+        // Data refresh will happen via page reload
     }
 
     /**
