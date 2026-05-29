@@ -37,13 +37,15 @@ class Security {
         $sanitized['pais'] = sanitize_text_field($data['pais']);
         $sanitized['pais'] = substr($sanitized['pais'], 0, 100);
         
-        // Sanitize numero_hora (must be between 1 and 40)
-        $sanitized['numero_hora'] = absint($data['numero_hora']);
-        $sanitized['numero_hora'] = max(1, min(40, $sanitized['numero_hora']));
+        $duration_hours = (int) get_option('horas_oracion_duration_hours', 40);
         
-        // Sanitize dia (must be 14, 15, or 16)
+        // Sanitize numero_hora
+        $sanitized['numero_hora'] = absint($data['numero_hora']);
+        $sanitized['numero_hora'] = max(1, min($duration_hours, $sanitized['numero_hora']));
+        
+        // Sanitize dia (must be 1-31)
         $sanitized['dia'] = absint($data['dia']);
-        $sanitized['dia'] = in_array($sanitized['dia'], [14, 15, 16]) ? $sanitized['dia'] : 14;
+        $sanitized['dia'] = max(1, min(31, $sanitized['dia']));
         
         // Sanitize hora (format HH:MM)
         $sanitized['hora'] = sanitize_text_field($data['hora']);
@@ -95,10 +97,12 @@ class Security {
             $errors[] = 'El país no puede exceder 100 caracteres';
         }
         
+        $duration_hours = (int) get_option('horas_oracion_duration_hours', 40);
+        
         // Validate numero_hora
         if (empty($data['numero_hora'])) {
             $errors[] = 'Debe seleccionar un horario';
-        } elseif ($data['numero_hora'] < 1 || $data['numero_hora'] > 40) {
+        } elseif ($data['numero_hora'] < 1 || $data['numero_hora'] > $duration_hours) {
             $errors[] = 'Horario inválido';
         }
         

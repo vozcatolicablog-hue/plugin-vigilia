@@ -55,7 +55,7 @@ class Frontend {
             // CSS
             wp_enqueue_style(
                 'horas-oracion-frontend',
-                HORAS_ORACION_PLUGIN_URL . 'assets/css/frontend.css',
+                HORAS_ORACION_PLUGIN_URL . 'assets/css/style.css',
                 [],
                 HORAS_ORACION_VERSION
             );
