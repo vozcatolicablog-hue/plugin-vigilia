@@ -33,7 +33,7 @@ if (!defined('ABSPATH')) {
     <?php endif; ?>
 
     <?php if ($atts['show_form'] === 'true'): ?>
-    <form id="horas-oracion-form" class="horas-oracion-form">
+    <form class="horas-oracion-form">
         <h3><?php esc_html_e('Inscríbete en la Vigilia', '40-horas-oracion'); ?></h3>
         <div class="form-row">
             <div class="form-group">
