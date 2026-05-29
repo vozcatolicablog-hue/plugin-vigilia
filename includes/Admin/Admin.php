@@ -1,0 +1,349 @@
+<?php
+/**
+ * Admin Class
+ * 
+ * Handles admin panel, menus, and screens
+ * 
+ * @package HorasOracion
+ * @subpackage Admin
+ * @since 1.0.0
+ */
+
+namespace HorasOracion\Admin;
+
+use HorasOracion\Database\Database;
+use HorasOracion\Security\Security;
+use HorasOracion\Export\Export;
+
+class Admin {
+    
+    /**
+     * Database instance
+     */
+    private $database;
+    
+    /**
+     * Security instance
+     */
+    private $security;
+    
+    /**
+     * Constructor
+     */
+    public function __construct(Database $database, Security $security) {
+        $this->database = $database;
+        $this->security = $security;
+        
+        add_action('admin_menu', [$this, 'add_admin_menu']);
+        add_action('admin_init', [$this, 'register_settings']);
+        add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
+        add_action('wp_ajax_horas_oracion_delete_registration', [$this, 'delete_registration_ajax']);
+        add_action('wp_ajax_horas_oracion_export_month_csv', [$this, 'export_month_csv_ajax']);
+    }
+    
+    /**
+     * Initialize admin
+     */
+    public function init() {
+        // Add admin menu
+        add_action('admin_menu', [$this, 'register_admin_menu']);
+        
+        // Enqueue admin assets
+        add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
+        
+        // Handle admin actions
+        add_action('admin_init', [$this, 'handle_admin_actions']);
+    }
+    
+    /**
+     * Add admin menu
+     */
+    public function add_admin_menu() {
+        // Main menu
+        add_menu_page(
+            '40 Horas de Oración',
+            '40 Horas de Oración',
+            'manage_options',
+            'horas-oracion',
+            [$this, 'render_inscriptions_page'],
+            'dashicons-clock',
+            30
+        );
+        
+        // Submenu: Inscripciones
+        add_submenu_page(
+            'horas-oracion',
+            'Inscripciones',
+            'Inscripciones',
+            'manage_options',
+            'horas-oracion',
+            [$this, 'render_inscriptions_page']
+        );
+        
+        // Submenu: Configuración
+        add_submenu_page(
+            'horas-oracion',
+            'Configuración',
+            'Configuración',
+            'manage_options',
+            'horas-oracion-settings',
+            [$this, 'render_settings_page']
+        );
+        
+        // Submenu: Exportaciones
+        add_submenu_page(
+            'horas-oracion',
+            'Exportaciones',
+            'Exportaciones',
+            'manage_options',
+            'horas-oracion-exports',
+            [$this, 'render_exports_page']
+        );
+    }
+    
+    /**
+     * Register settings
+     */
+    public function register_settings() {
+        // This method is called on admin_init hook
+        // Settings registration can be done here if needed with register_setting()
+    }
+    
+    /**
+     * Enqueue admin assets
+     */
+    public function enqueue_admin_assets($hook) {
+        // Only enqueue on our admin pages
+        if (strpos($hook, 'horas-oracion') === false) {
+            return;
+        }
+        
+        // CSS
+        wp_enqueue_style(
+            'horas-oracion-admin',
+            HORAS_ORACION_PLUGIN_URL . 'assets/css/admin.css',
+            [],
+            HORAS_ORACION_VERSION
+        );
+        
+        // JS
+        wp_enqueue_script(
+            'horas-oracion-admin',
+            HORAS_ORACION_PLUGIN_URL . 'assets/js/admin.js',
+            ['jquery'],
+            HORAS_ORACION_VERSION,
+            true
+        );
+        
+        // Localize script
+        wp_localize_script('horas-oracion-admin', 'horasOracionAdmin', [
+            'ajaxUrl' => admin_url('admin-ajax.php'),
+            'nonce' => $this->security->create_nonce('horas_oracion_admin_nonce'),
+        ]);
+    }
+    
+    /**
+     * Handle admin actions
+     */
+    public function handle_admin_actions() {
+        // Delete registration
+        if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['registration_id'])) {
+            if (!isset($_GET['_wpnonce']) || !wp_verify_nonce($_GET['_wpnonce'], 'delete_registration_' . $_GET['registration_id'])) {
+                wp_die('Error de seguridad');
+            }
+            
+            $id = absint($_GET['registration_id']);
+            $this->database->delete_registration($id);
+            
+            wp_redirect(admin_url('admin.php?page=horas-oracion&deleted=1'));
+            exit;
+        }
+        
+        // Export CSV
+        if (isset($_GET['action']) && $_GET['action'] === 'export') {
+            if (!isset($_GET['_wpnonce']) || !wp_verify_nonce($_GET['_wpnonce'], 'export_csv')) {
+                wp_die('Error de seguridad');
+            }
+            
+            $this->export_csv();
+        }
+        
+        // Save settings
+        if (isset($_POST['horas_oracion_save_settings'])) {
+            if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'horas_oracion_settings')) {
+                wp_die('Error de seguridad');
+            }
+            
+            $this->save_settings();
+        }
+    }
+    
+    /**
+     * Render inscriptions page
+     */
+    public function render_inscriptions_page() {
+        $page = isset($_GET['paged']) ? max(1, absint($_GET['paged'])) : 1;
+        $per_page = 20;
+        $offset = ($page - 1) * $per_page;
+        
+        $search = isset($_GET['s']) ? sanitize_text_field($_GET['s']) : '';
+        $month = isset($_GET['month']) ? sanitize_text_field($_GET['month']) : '';
+        
+        $registrations = $this->database->get_all_registrations($per_page, $offset, $search, $month);
+        $total = $this->database->get_total_count($search, $month);
+        $total_pages = ceil($total / $per_page);
+        
+        // Get statistics
+        $current_month_count = $this->database->get_current_month_count();
+        $historical_count = $this->database->get_historical_count();
+        
+        include HORAS_ORACION_PLUGIN_DIR . 'templates/admin-inscriptions.php';
+    }
+    
+    /**
+     * Render settings page
+     */
+    public function render_settings_page() {
+        $settings = [
+            'intro_text' => get_option('horas_oracion_intro_text', ''),
+            'primary_color' => get_option('horas_oracion_primary_color', '#3b82f6'),
+            'allow_multiple_per_hour' => get_option('horas_oracion_allow_multiple_per_hour', '1'),
+            'max_per_hour' => get_option('horas_oracion_max_per_hour', '0'),
+            'historical_count' => get_option('horas_oracion_historical_count', '13965'),
+            'recaptcha_site_key' => get_option('horas_oracion_recaptcha_site_key', ''),
+            'recaptcha_secret_key' => get_option('horas_oracion_recaptcha_secret_key', ''),
+            'turnstile_site_key' => get_option('horas_oracion_turnstile_site_key', ''),
+            'turnstile_secret_key' => get_option('horas_oracion_turnstile_secret_key', ''),
+            'start_day' => get_option('horas_oracion_start_day', '14'),
+            'start_time' => get_option('horas_oracion_start_time', '08:00'),
+            'duration_hours' => get_option('horas_oracion_duration_hours', '40'),
+            'reset_days' => get_option('horas_oracion_reset_days', '2'),
+        ];
+        
+        extract($settings);
+        
+        include HORAS_ORACION_PLUGIN_DIR . 'templates/admin-settings.php';
+    }
+    
+    /**
+     * Render exports page
+     */
+    public function render_exports_page() {
+        $upload_dir = wp_upload_dir();
+        $export_dir = $upload_dir['basedir'] . '/40-horas-oracion';
+        $export_url = $upload_dir['baseurl'] . '/40-horas-oracion';
+        
+        $files = [];
+        if (is_dir($export_dir)) {
+            $files = glob($export_dir . '/*.csv');
+            rsort($files); // Newest first
+        }
+        
+        include HORAS_ORACION_PLUGIN_DIR . 'templates/admin-exports.php';
+    }
+    
+    /**
+     * Save settings
+     */
+    private function save_settings() {
+        // Intro text
+        $intro_text = isset($_POST['intro_text']) ? sanitize_textarea_field($_POST['intro_text']) : '';
+        update_option('horas_oracion_intro_text', $intro_text);
+        
+        // Primary color
+        $primary_color = isset($_POST['primary_color']) ? sanitize_hex_color($_POST['primary_color']) : '#3b82f6';
+        update_option('horas_oracion_primary_color', $primary_color);
+        
+        // Allow multiple per hour
+        $allow_multiple = isset($_POST['allow_multiple_per_hour']) ? '1' : '0';
+        update_option('horas_oracion_allow_multiple_per_hour', $allow_multiple);
+        
+        // Max per hour
+        $max_per_hour = isset($_POST['max_per_hour']) ? absint($_POST['max_per_hour']) : 0;
+        update_option('horas_oracion_max_per_hour', $max_per_hour);
+        
+        // Historical count
+        $historical_count = isset($_POST['historical_count']) ? absint($_POST['historical_count']) : 13965;
+        update_option('horas_oracion_historical_count', $historical_count);
+        
+        // reCAPTCHA
+        $recaptcha_site_key = isset($_POST['recaptcha_site_key']) ? sanitize_text_field($_POST['recaptcha_site_key']) : '';
+        update_option('horas_oracion_recaptcha_site_key', $recaptcha_site_key);
+        
+        $recaptcha_secret_key = isset($_POST['recaptcha_secret_key']) ? sanitize_text_field($_POST['recaptcha_secret_key']) : '';
+        update_option('horas_oracion_recaptcha_secret_key', $recaptcha_secret_key);
+        
+        // Turnstile
+        $turnstile_site_key = isset($_POST['turnstile_site_key']) ? sanitize_text_field($_POST['turnstile_site_key']) : '';
+        update_option('horas_oracion_turnstile_site_key', $turnstile_site_key);
+        
+        $turnstile_secret_key = isset($_POST['turnstile_secret_key']) ? sanitize_text_field($_POST['turnstile_secret_key']) : '';
+        update_option('horas_oracion_turnstile_secret_key', $turnstile_secret_key);
+        
+        // Dynamic schedule
+        $start_day = isset($_POST['start_day']) ? absint($_POST['start_day']) : 14;
+        update_option('horas_oracion_start_day', $start_day);
+        
+        $start_time = isset($_POST['start_time']) ? sanitize_text_field($_POST['start_time']) : '08:00';
+        update_option('horas_oracion_start_time', $start_time);
+        
+        $duration_hours = isset($_POST['duration_hours']) ? absint($_POST['duration_hours']) : 40;
+        update_option('horas_oracion_duration_hours', $duration_hours);
+        
+        $reset_days = isset($_POST['reset_days']) ? absint($_POST['reset_days']) : 2;
+        update_option('horas_oracion_reset_days', $reset_days);
+        
+        // Redirect with success message
+        wp_redirect(admin_url('admin.php?page=horas-oracion-settings&saved=1'));
+        exit;
+    }
+    
+    /**
+     * Export CSV
+     */
+    private function export_csv() {
+        $month = isset($_GET['month']) ? absint($_GET['month']) : null;
+        $year = isset($_GET['year']) ? absint($_GET['year']) : null;
+        
+        $registrations = $this->database->get_all_for_export($month, $year);
+        
+        // Generate filename
+        if ($month && $year) {
+            $filename = sprintf('40-horas-oracion-%04d-%02d.csv', $year, $month);
+        } else {
+            $filename = '40-horas-oracion-export.csv';
+        }
+        
+        // Set headers
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        
+        // Open output stream
+        $output = fopen('php://output', 'w');
+        
+        // Add BOM for UTF-8
+        fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
+        
+        // Write header
+        fputcsv($output, ['Nombre', 'Apellido', 'Ciudad', 'País', 'Número de Hora', 'Día', 'Hora', 'Fecha de Inscripción']);
+        
+        // Write data
+        foreach ($registrations as $row) {
+            fputcsv($output, [
+                $row->nombre,
+                $row->apellido,
+                $row->ciudad,
+                $row->pais,
+                $row->numero_hora,
+                $row->dia,
+                $row->hora,
+                $row->created_at
+            ]);
+        }
+        
+        fclose($output);
+        exit;
+    }
+}

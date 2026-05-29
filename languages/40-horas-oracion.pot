@@ -1,0 +1,187 @@
+# 40 Horas de Oración - Translation Template
+# Copyright (C) 2026
+# This file is distributed under the same license as the 40 Horas de Oración package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 40 Horas de Oración 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-05-29 00:00:00+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language-Team: Spanish\n"
+
+msgid "40 Horas de Oración"
+msgstr ""
+
+msgid "Inscripciones"
+msgstr ""
+
+msgid "Configuración"
+msgstr ""
+
+msgid "Exportaciones"
+msgstr ""
+
+msgid "Bienvenida a las 40 Horas de Oración"
+msgstr ""
+
+msgid "Personas inscritas este mes"
+msgstr ""
+
+msgid "Total histórico de participantes"
+msgstr ""
+
+msgid "Formulario de inscripción"
+msgstr ""
+
+msgid "Nombre"
+msgstr ""
+
+msgid "Apellido"
+msgstr ""
+
+msgid "Ciudad"
+msgstr ""
+
+msgid "País"
+msgstr ""
+
+msgid "Hora de oración"
+msgstr ""
+
+msgid "Inscribirse"
+msgstr ""
+
+msgid "Por favor complete todos los campos requeridos."
+msgstr ""
+
+msgid "Inscripción realizada correctamente"
+msgstr ""
+
+msgid "Error en el captcha"
+msgstr ""
+
+msgid "Ese horario ya está completo"
+msgstr ""
+
+msgid "Error al procesar la inscripción"
+msgstr ""
+
+msgid "Horarios disponibles"
+msgstr ""
+
+msgid "Día"
+msgstr ""
+
+msgid "Hora"
+msgstr ""
+
+msgid "Personas anotadas"
+msgstr ""
+
+msgid "No hay inscripciones"
+msgstr ""
+
+msgid "Información de la página"
+msgstr ""
+
+msgid "Texto introductorio"
+msgstr ""
+
+msgid "Color principal"
+msgstr ""
+
+msgid "Contador histórico inicial"
+msgstr ""
+
+msgid "Claves CAPTCHA"
+msgstr ""
+
+msgid "Clave del sitio reCAPTCHA"
+msgstr ""
+
+msgid "Clave secreta reCAPTCHA"
+msgstr ""
+
+msgid "Clave del sitio Turnstile"
+msgstr ""
+
+msgid "Clave secreta Turnstile"
+msgstr ""
+
+msgid "Opciones de inscripción"
+msgstr ""
+
+msgid "Permitir múltiples personas por hora"
+msgstr ""
+
+msgid "Máximo de personas por hora"
+msgstr ""
+
+msgid "Guardar configuración"
+msgstr ""
+
+msgid "Configuración guardada correctamente."
+msgstr ""
+
+msgid "Exportar CSV"
+msgstr ""
+
+msgid "Descargar"
+msgstr ""
+
+msgid "Eliminar"
+msgstr ""
+
+msgid "¿Está seguro que desea eliminar este registro?"
+msgstr ""
+
+msgid "Registro eliminado correctamente."
+msgstr ""
+
+msgid "Error al eliminar el registro."
+msgstr ""
+
+msgid "CSV exportado correctamente."
+msgstr ""
+
+msgid "Error al exportar CSV."
+msgstr ""
+
+msgid "Nombre completo"
+msgstr ""
+
+msgid "Número de Hora"
+msgstr ""
+
+msgid "Fecha de Inscripción"
+msgstr ""
+
+msgid "Estadísticas"
+msgstr ""
+
+msgid "Total de inscripciones"
+msgstr ""
+
+msgid "Participantes este mes"
+msgstr ""
+
+msgid "No tiene permisos para acceder a esta página."
+msgstr ""
+
+msgid "Filtrar"
+msgstr ""
+
+msgid "Buscar"
+msgstr ""
+
+msgid "Mostrar por mes"
+msgstr ""
+
+msgid "Página"
+msgstr ""
+
+msgid "de"
+msgstr ""

@@ -1,0 +1,88 @@
+# 40 Horas de Oración Spanish Translation
+# Copyright (C) 2026
+# This file is distributed under the same license as the 40 Horas de Oración package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 40 Horas de Oración 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-05-29 00:00:00+0000\n"
+"PO-Revision-Date: 2026-05-29 00:00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: Spanish\n"
+"Language: es_ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "40 Horas de Oración"
+msgstr "40 Horas de Oración"
+
+msgid "Inscripciones"
+msgstr "Inscripciones"
+
+msgid "Configuración"
+msgstr "Configuración"
+
+msgid "Exportaciones"
+msgstr "Exportaciones"
+
+msgid "Bienvenida a las 40 Horas de Oración"
+msgstr "Bienvenida a las 40 Horas de Oración"
+
+msgid "Personas inscritas este mes"
+msgstr "Personas inscritas este mes"
+
+msgid "Total histórico de participantes"
+msgstr "Total histórico de participantes"
+
+msgid "Formulario de inscripción"
+msgstr "Formulario de inscripción"
+
+msgid "Nombre"
+msgstr "Nombre"
+
+msgid "Apellido"
+msgstr "Apellido"
+
+msgid "Ciudad"
+msgstr "Ciudad"
+
+msgid "País"
+msgstr "País"
+
+msgid "Hora de oración"
+msgstr "Hora de oración"
+
+msgid "Inscribirse"
+msgstr "Inscribirse"
+
+msgid "Por favor complete todos los campos requeridos."
+msgstr "Por favor complete todos los campos requeridos."
+
+msgid "Inscripción realizada correctamente"
+msgstr "Inscripción realizada correctamente"
+
+msgid "Error en el captcha"
+msgstr "Error en el captcha"
+
+msgid "Ese horario ya está completo"
+msgstr "Ese horario ya está completo"
+
+msgid "Error al procesar la inscripción"
+msgstr "Error al procesar la inscripción"
+
+msgid "Horarios disponibles"
+msgstr "Horarios disponibles"
+
+msgid "Día"
+msgstr "Día"
+
+msgid "Hora"
+msgstr "Hora"
+
+msgid "Personas anotadas"
+msgstr "Personas anotadas"
+
+msgid "No hay inscripciones"
+msgstr "No hay inscripciones"
