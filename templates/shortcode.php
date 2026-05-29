@@ -72,8 +72,26 @@ if (!defined('ABSPATH')) {
                 </select>
             </div>
             
-            <div class="ho-captcha-container">
-                <!-- CAPTCHA will be rendered here via JS -->
+            <div class="ho-captcha-container" style="margin-bottom: 15px;">
+                <?php 
+                if ($captcha_type === 'recaptcha'): 
+                    if (!empty($recaptcha_site_key)):
+                ?>
+                    <div class="g-recaptcha" data-sitekey="<?php echo esc_attr($recaptcha_site_key); ?>"></div>
+                <?php 
+                    elseif (current_user_can('manage_options')):
+                        echo '<p style="color:#d63638; font-weight:bold; background:#fbeaea; padding:10px; border-left:4px solid #d63638;">⚠️ Aviso para el Administrador: Has activado reCAPTCHA pero falta configurar la Clave del Sitio en los ajustes del plugin.</p>';
+                    endif;
+                elseif ($captcha_type === 'turnstile'): 
+                    if (!empty($turnstile_site_key)):
+                ?>
+                    <div class="cf-turnstile" data-sitekey="<?php echo esc_attr($turnstile_site_key); ?>"></div>
+                <?php 
+                    elseif (current_user_can('manage_options')):
+                        echo '<p style="color:#d63638; font-weight:bold; background:#fbeaea; padding:10px; border-left:4px solid #d63638;">⚠️ Aviso para el Administrador: Has activado Turnstile pero falta configurar la Clave del Sitio en los ajustes del plugin.</p>';
+                    endif;
+                endif; 
+                ?>
             </div>
 
             <div class="form-message"></div>

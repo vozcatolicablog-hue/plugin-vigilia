@@ -130,6 +130,11 @@ class Frontend {
         // Get primary color
         $primary_color = get_option('horas_oracion_primary_color', '#3b82f6');
         
+        // Get CAPTCHA info
+        $captcha_type = $this->security->get_captcha_type();
+        $recaptcha_site_key = get_option('horas_oracion_recaptcha_site_key', '');
+        $turnstile_site_key = get_option('horas_oracion_turnstile_site_key', '');
+        
         ob_start();
         include HORAS_ORACION_PLUGIN_DIR . 'templates/shortcode.php';
         return ob_get_clean();
