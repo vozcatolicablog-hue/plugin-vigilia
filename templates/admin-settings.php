@@ -21,8 +21,9 @@ if (!defined('ABSPATH')) {
         </div>
     <?php endif; ?>
 
-    <form method="post" action="options.php">
-        <?php settings_fields('horas_oracion_settings_group'); ?>
+    <form method="post" action="">
+        <?php wp_nonce_field('horas_oracion_settings'); ?>
+        <input type="hidden" name="horas_oracion_save_settings" value="1" />
 
         <!-- Shortcode Info -->
         <div class="horas-oracion-admin-box" style="background: #f0f6fc; border-left: 4px solid #3b82f6;">
