@@ -62,9 +62,10 @@ if (!defined('ABSPATH')) {
                 <?php foreach ($hours_structure as $num => $hour): ?>
                     <option value="<?php echo esc_attr($num); ?>">
                         <?php printf(
-                            esc_html__('Hora %1$d — Día %2$d — %3$s', '40-horas-oracion'),
+                            esc_html__('Hora %1$d — Día %2$d de %3$s — %4$s', '40-horas-oracion'),
                             $num,
                             $hour['dia'],
+                            date_i18n('F'),
                             $hour['hora']
                         ); ?>
                     </option>
@@ -113,9 +114,10 @@ if (!defined('ABSPATH')) {
                     <div class="horas-oracion-hours-group-header">
                         <h4>
                             <?php printf(
-                                esc_html__('Hora %1$d — Día %2$d — %3$s', '40-horas-oracion'),
+                                esc_html__('Hora %1$d — Día %2$d de %3$s — %4$s', '40-horas-oracion'),
                                 $num,
                                 $hour['dia'],
+                                date_i18n('F'),
                                 $hour['hora']
                             ); ?>
                         </h4>
@@ -125,8 +127,7 @@ if (!defined('ABSPATH')) {
                         if (isset($registrations[$num]) && !empty($registrations[$num]['participants'])) {
                             foreach ($registrations[$num]['participants'] as $p) {
                                 echo '<li>';
-                                echo '<span class="horas-oracion-participant-name">' . esc_html($p->nombre . ' ' . $p->apellido) . '</span>';
-                                echo '<span class="horas-oracion-participant-location">' . esc_html($p->ciudad . ', ' . $p->pais) . '</span>';
+                                echo '<span class="horas-oracion-participant-single-line">' . esc_html($p->nombre . ' ' . $p->apellido . ' - ' . $p->ciudad . ', ' . $p->pais) . '</span>';
                                 echo '</li>';
                             }
                         } else {

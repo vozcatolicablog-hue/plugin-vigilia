@@ -76,6 +76,7 @@ class Frontend {
                 'captchaType' => $this->security->get_captcha_type(),
                 'recaptchaSiteKey' => get_option('horas_oracion_recaptcha_site_key', ''),
                 'turnstileSiteKey' => get_option('horas_oracion_turnstile_site_key', ''),
+                'currentMonth' => date_i18n('F'),
             ]);
             
             // Load reCAPTCHA script if needed

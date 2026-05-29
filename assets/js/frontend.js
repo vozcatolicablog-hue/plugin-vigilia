@@ -152,7 +152,8 @@
                         $.each(data.registrations, function(index, hourGroup) {
                             scheduleHtml += '<div class="horas-oracion-hours-group">';
                             scheduleHtml += '<div class="horas-oracion-hours-group-header">';
-                            scheduleHtml += '<h4>Hora ' + hourGroup.numero_hora + ' — Día ' + hourGroup.dia + ' — ' + hourGroup.hora + '</h4>';
+                            var monthName = horasOracion.currentMonth || '';
+                            scheduleHtml += '<h4>Hora ' + hourGroup.numero_hora + ' — Día ' + hourGroup.dia + (monthName ? ' de ' + monthName : '') + ' — ' + hourGroup.hora + '</h4>';
                             scheduleHtml += '</div>';
                             
                             scheduleHtml += '<ul class="horas-oracion-participants-list">';
@@ -160,8 +161,7 @@
                             if (hourGroup.participants && hourGroup.participants.length > 0) {
                                 $.each(hourGroup.participants, function(i, participant) {
                                     scheduleHtml += '<li>';
-                                    scheduleHtml += '<span class="horas-oracion-participant-name">' + participant.nombre + ' ' + participant.apellido + '</span>';
-                                    scheduleHtml += '<span class="horas-oracion-participant-location">' + participant.ciudad + ', ' + participant.pais + '</span>';
+                                    scheduleHtml += '<span class="horas-oracion-participant-single-line">' + participant.nombre + ' ' + participant.apellido + ' - ' + participant.ciudad + ', ' + participant.pais + '</span>';
                                     scheduleHtml += '</li>';
                                 });
                             } else {

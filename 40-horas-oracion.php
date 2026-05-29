@@ -19,7 +19,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('HORAS_ORACION_VERSION', '1.1.0');
+define('HORAS_ORACION_VERSION', '1.1.2');
 define('HORAS_ORACION_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('HORAS_ORACION_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('HORAS_ORACION_PLUGIN_BASENAME', plugin_basename(__FILE__));
