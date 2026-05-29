@@ -15,6 +15,11 @@ if (!defined('ABSPATH')) {
     <h1><?php esc_html_e('40 Horas de Oración', '40-horas-oracion'); ?></h1>
     <p class="page-description"><?php esc_html_e('Gestiona todas las inscripciones mensuales', '40-horas-oracion'); ?></p>
 
+    <!-- Shortcode Info -->
+    <div class="horas-oracion-admin-box" style="background: #f0f6fc; border-left: 4px solid #3b82f6; margin-top: 15px;">
+        <p style="margin: 0;"><strong><?php esc_html_e('Shortcode:', '40-horas-oracion'); ?></strong> <code style="font-size: 1.1em; padding: 3px 8px; background: #fff; border: 1px solid #ccd0d4;">[horas_oracion]</code> - <?php esc_html_e('Usa este código para mostrar el formulario en cualquier página.', '40-horas-oracion'); ?></p>
+    </div>
+
     <!-- Notices -->
     <div id="horas-oracion-notices"></div>
 

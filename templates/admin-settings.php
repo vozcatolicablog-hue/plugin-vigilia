@@ -24,6 +24,13 @@ if (!defined('ABSPATH')) {
     <form method="post" action="options.php">
         <?php settings_fields('horas_oracion_settings_group'); ?>
 
+        <!-- Shortcode Info -->
+        <div class="horas-oracion-admin-box" style="background: #f0f6fc; border-left: 4px solid #3b82f6;">
+            <h2><?php esc_html_e('Shortcode del Plugin', '40-horas-oracion'); ?></h2>
+            <p><?php esc_html_e('Copia y pega el siguiente shortcode en la página donde desees mostrar el sistema de inscripción:', '40-horas-oracion'); ?></p>
+            <p><code style="font-size: 1.2em; padding: 5px 10px; display: inline-block; background: #fff; border: 1px solid #ccd0d4;">[horas_oracion]</code></p>
+        </div>
+
         <!-- Información General -->
         <div class="horas-oracion-admin-box">
             <h2><?php esc_html_e('Información de la página', '40-horas-oracion'); ?></h2>
