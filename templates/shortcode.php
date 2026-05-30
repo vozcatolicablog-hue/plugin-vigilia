@@ -12,44 +12,59 @@ if (!defined('ABSPATH')) {
 // Get dynamic dates for the counters
 $start_day = get_option('horas_oracion_start_day', 14);
 $duration = get_option('horas_oracion_duration_hours', 40);
-// Calculate end day: if 40 hours starting at 08:00, it usually ends the next day at 24:00 (day 15), meaning 14 to 16 inclusive for a 3-day vigilia.
-$current_month_str = wp_date('F \d\e Y');
+
+// Calculate target timestamp to determine the month
+$end_day_approx = $start_day + ceil($duration / 24);
+$current_day = (int) wp_date('j');
+$target_timestamp = time();
+
+if ($current_day > $end_day_approx) {
+    $target_timestamp = strtotime('first day of next month');
+}
+
+$current_month_str = wp_date('F \d\e Y', $target_timestamp);
 $dates_str = sprintf('%d al %d de %s', $start_day, $start_day + 2, $current_month_str);
 
+$target_month = wp_date('F', $target_timestamp);
+$next_month = wp_date('F', strtotime('+1 month', $target_timestamp));
+
+// Calculate color variants based on primary color
+$primary_color = isset($primary_color) ? $primary_color : '#5b3b8c';
+$hex = ltrim($primary_color, '#');
+if (strlen($hex) == 3) {
+    $r = hexdec(str_repeat(substr($hex, 0, 1), 2));
+    $g = hexdec(str_repeat(substr($hex, 1, 1), 2));
+    $b = hexdec(str_repeat(substr($hex, 2, 1), 2));
+} else {
+    $r = hexdec(substr($hex, 0, 2));
+    $g = hexdec(substr($hex, 2, 2));
+    $b = hexdec(substr($hex, 4, 2));
+}
+$primary_light = sprintf('rgba(%d, %d, %d, 0.15)', $r, $g, $b);
+$hover_r = max(0, round($r * 0.8));
+$hover_g = max(0, round($g * 0.8));
+$hover_b = max(0, round($b * 0.8));
+$primary_hover = sprintf('rgb(%d, %d, %d)', $hover_r, $hover_g, $hover_b);
 ?>
+
+<style>
+.horas-oracion-container {
+    --ho-primary: <?php echo esc_attr($primary_color); ?>;
+    --ho-primary-light: <?php echo esc_attr($primary_light); ?>;
+    --ho-primary-hover: <?php echo esc_attr($primary_hover); ?>;
+}
+</style>
 
 <div class="horas-oracion-container">
     
     <!-- Header / Intro -->
-    <div class="horas-oracion-intro">
-        <!-- SVG Custodia Placeholder -->
-        <div class="ho-icon-custodia">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="5"></circle>
-                <line x1="12" y1="1" x2="12" y2="4"></line>
-                <line x1="12" y1="20" x2="12" y2="23"></line>
-                <line x1="1" y1="12" x2="4" y2="12"></line>
-                <line x1="20" y1="12" x2="23" y2="12"></line>
-                <line x1="4.22" y1="4.22" x2="6.34" y2="6.34"></line>
-                <line x1="17.66" y1="17.66" x2="19.78" y2="19.78"></line>
-                <line x1="4.22" y1="19.78" x2="6.34" y2="17.66"></line>
-                <line x1="17.66" y1="4.22" x2="19.78" y2="6.34"></line>
-            </svg>
-        </div>
-        
+    <div class="horas-oracion-intro">   
         <h2 class="ho-main-title"><?php esc_html_e('40 Horas de Oración', '40-horas-oracion'); ?></h2>
         <h3 class="ho-subtitle"><?php printf(esc_html__('%d, %d y %d de cada mes', '40-horas-oracion'), $start_day, $start_day+1, $start_day+2); ?></h3>
         
         <?php if (!empty($intro_text)): ?>
             <div class="ho-intro-text"><?php echo wpautop(esc_html($intro_text)); ?></div>
         <?php endif; ?>
-        
-        <div class="ho-intro-note">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="#5b3b8c" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-            </svg>
-            <span><?php esc_html_e('Una hora de tu oración puede cambiar muchas vidas.', '40-horas-oracion'); ?></span>
-        </div>
     </div>
 
     <!-- Counters -->
@@ -127,9 +142,10 @@ $dates_str = sprintf('%d al %d de %s', $start_day, $start_day + 2, $current_mont
                 <?php foreach ($hours_structure as $num => $hour): ?>
                     <option value="<?php echo esc_attr($num); ?>">
                         <?php printf(
-                            esc_html__('Hora %1$d — Día %2$d — %3$s', '40-horas-oracion'),
+                            esc_html__('Hora %1$d — %2$d de %3$s — %4$s', '40-horas-oracion'),
                             $num,
                             $hour['dia'],
+                            ($hour['dia'] < $start_day) ? $next_month : $target_month,
                             $hour['hora']
                         ); ?>
                     </option>
@@ -154,9 +170,6 @@ $dates_str = sprintf('%d al %d de %s', $start_day, $start_day + 2, $current_mont
         <div class="form-message"></div>
 
         <button type="submit" class="horas-oracion-btn btn-primary btn-full">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-            </svg>
             <?php esc_html_e('Inscribirme', '40-horas-oracion'); ?>
         </button>
         <p class="form-footer-note"><?php esc_html_e('Al inscribirte, estás ofreciendo una hora de oración por las vocaciones.', '40-horas-oracion'); ?></p>
@@ -177,7 +190,6 @@ $dates_str = sprintf('%d al %d de %s', $start_day, $start_day + 2, $current_mont
             </div>
             <div>
                 <h3><?php esc_html_e('Horarios y personas anotadas', '40-horas-oracion'); ?></h3>
-                <p><?php esc_html_e('Estos son los horarios ya cubiertos por otras mujeres que oran.', '40-horas-oracion'); ?></p>
             </div>
         </div>
 
@@ -187,9 +199,10 @@ $dates_str = sprintf('%d al %d de %s', $start_day, $start_day + 2, $current_mont
                     <div class="ho-hour-header">
                         <h4>
                             <?php printf(
-                                esc_html__('Hora %1$d — Día %2$d — %3$s', '40-horas-oracion'),
+                                esc_html__('Hora %1$d — %2$d de %3$s — %4$s', '40-horas-oracion'),
                                 $num,
                                 $hour['dia'],
+                                ($hour['dia'] < $start_day) ? $next_month : $target_month,
                                 $hour['hora']
                             ); ?>
                         </h4>
@@ -220,13 +233,17 @@ $dates_str = sprintf('%d al %d de %s', $start_day, $start_day + 2, $current_mont
                             </li>
                             <?php endforeach; ?>
                         </ul>
+                    <?php else: ?>
+                        <div class="ho-empty-hour" style="padding: 1.5rem; text-align: center; color: var(--ho-text-light); font-size: 0.9rem; font-style: italic;">
+                            <?php esc_html_e('Aún no hay personas anotadas en esta hora. ¡Animate a ser la primera!', '40-horas-oracion'); ?>
+                        </div>
                     <?php endif; ?>
                 </div>
             <?php endforeach; ?>
         </div>
         
         <div class="table-footer-note">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#5b3b8c" xmlns="http://www.w3.org/2000/svg">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="var(--ho-primary)" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
             </svg>
             <span><?php esc_html_e('Gracias por ser parte de esta cadena de oración.', '40-horas-oracion'); ?></span>
