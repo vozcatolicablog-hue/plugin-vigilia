@@ -151,13 +151,23 @@
                     if ($('.table-body').length > 0) {
                         var scheduleHtml = '';
                         
-                        $.each(data.registrations, function(index, hourGroup) {
+                        // Index registrations by numero_hora for fast lookup
+                        var regByHour = {};
+                        if (data.registrations) {
+                            $.each(data.registrations, function(index, hourGroup) {
+                                regByHour[hourGroup.numero_hora] = hourGroup;
+                            });
+                        }
+                        
+                        // Iterate over ALL hours from the structure (even empty ones)
+                        $.each(data.hours_structure, function(numHora, hourInfo) {
+                            var hourGroup = regByHour[numHora];
                             scheduleHtml += '<div class="ho-hour-row">';
                             scheduleHtml += '<div class="ho-hour-header">';
-                            scheduleHtml += '<h4>Hora ' + hourGroup.numero_hora + ' — Día ' + hourGroup.dia + ' — ' + hourGroup.hora + '</h4>';
+                            scheduleHtml += '<h4>' + hourInfo.label + '</h4>';
                             scheduleHtml += '</div>';
                             
-                            if (hourGroup.participants && hourGroup.participants.length > 0) {
+                            if (hourGroup && hourGroup.participants && hourGroup.participants.length > 0) {
                                 scheduleHtml += '<ul class="ho-participants-list">';
                                 $.each(hourGroup.participants, function(i, participant) {
                                     scheduleHtml += '<li>';
@@ -171,6 +181,10 @@
                                     scheduleHtml += '</li>';
                                 });
                                 scheduleHtml += '</ul>';
+                            } else {
+                                scheduleHtml += '<div class="ho-empty-hour" style="padding: 1.5rem; text-align: center; color: var(--ho-text-light); font-size: 0.9rem; font-style: italic;">';
+                                scheduleHtml += 'Aún no hay personas anotadas en esta hora. ¡Animate a ser la primera!';
+                                scheduleHtml += '</div>';
                             }
                             scheduleHtml += '</div>';
                         });

@@ -193,8 +193,34 @@ class AJAX {
             ];
         }
         
+        // Get hours structure with formatted labels so the frontend can render all hours
+        $hours_structure_raw = Database::get_hours_structure();
+        $start_day = (int) get_option('horas_oracion_start_day', 14);
+        $duration = (int) get_option('horas_oracion_duration_hours', 40);
+        
+        // Calculate target month (same logic as shortcode.php)
+        $end_day_approx = $start_day + ceil($duration / 24);
+        $current_day = (int) wp_date('j');
+        $target_timestamp = time();
+        if ($current_day > $end_day_approx) {
+            $target_timestamp = strtotime('first day of next month');
+        }
+        $target_month = wp_date('F', $target_timestamp);
+        $next_month = wp_date('F', strtotime('+1 month', $target_timestamp));
+        
+        $hours_structure = [];
+        foreach ($hours_structure_raw as $num => $hour) {
+            $month_name = ($hour['dia'] < $start_day) ? $next_month : $target_month;
+            $hours_structure[$num] = [
+                'dia' => $hour['dia'],
+                'hora' => $hour['hora'],
+                'label' => sprintf('Hora %d — %d de %s — %s', $num, $hour['dia'], $month_name, $hour['hora'])
+            ];
+        }
+        
         wp_send_json_success([
             'registrations' => $formatted,
+            'hours_structure' => $hours_structure,
             'current_month_count' => $current_month_count,
             'historical_count' => $historical_count
         ]);
