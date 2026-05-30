@@ -77,6 +77,16 @@ class Frontend {
                 'recaptchaSiteKey' => get_option('horas_oracion_recaptcha_site_key', ''),
                 'turnstileSiteKey' => get_option('horas_oracion_turnstile_site_key', ''),
                 'currentMonth' => date_i18n('F'),
+                'i18n' => [
+                    'fillRequired' => __('Por favor complete todos los campos requeridos.', '40-horas-oracion'),
+                    'sending' => __('Enviando...', '40-horas-oracion'),
+                    'unknownError' => __('Error desconocido', '40-horas-oracion'),
+                    'requestError' => __('Error al procesar la solicitud. Por favor intente nuevamente.', '40-horas-oracion'),
+                    'submitBtn' => __('Inscribirme', '40-horas-oracion'),
+                    'emptyHour' => __('Aún no hay personas anotadas en esta hora. ¡Animate a ser la primera!', '40-horas-oracion'),
+                    'hourPrefix' => __('Hora', '40-horas-oracion'),
+                    'dayPrefix' => __('Día', '40-horas-oracion'),
+                ]
             ]);
             
             // Load reCAPTCHA script if needed

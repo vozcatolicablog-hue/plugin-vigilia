@@ -53,13 +53,13 @@
 
         if (!nombre || !nombre.trim() || !apellido || !apellido.trim() || 
             !ciudad || !ciudad.trim() || !pais || !pais.trim() || !numero_hora) {
-            showMessage('Por favor complete todos los campos requeridos.', 'error', messageContainer);
+            showMessage(horasOracion.i18n.fillRequired, 'error', messageContainer);
             return;
         }
 
         // Disable submit button
         submitBtn.prop('disabled', true);
-        submitBtn.html('<span class="horas-oracion-spinner"></span> Enviando...');
+        submitBtn.html('<span class="horas-oracion-spinner"></span> ' + horasOracion.i18n.sending);
 
         // Prepare data
         var formData = {
@@ -108,16 +108,16 @@
                         turnstile.reset();
                     }
                 } else {
-                    showMessage('✗ ' + (response.data && response.data.message ? response.data.message : 'Error desconocido'), 'error', messageContainer);
+                    showMessage('✗ ' + (response.data && response.data.message ? response.data.message : horasOracion.i18n.unknownError), 'error', messageContainer);
                 }
             },
             error: function(xhr, status, error) {
                 console.error('AJAX error:', status, error, xhr.responseText);
-                showMessage('✗ Error al procesar la solicitud. Por favor intente nuevamente.', 'error', messageContainer);
+                showMessage('✗ ' + horasOracion.i18n.requestError, 'error', messageContainer);
             },
             complete: function() {
                 submitBtn.prop('disabled', false);
-                submitBtn.html('Inscribirme');
+                submitBtn.html(horasOracion.i18n.submitBtn);
             }
         });
     }
@@ -151,23 +151,13 @@
                     if ($('.table-body').length > 0) {
                         var scheduleHtml = '';
                         
-                        // Index registrations by numero_hora for fast lookup
-                        var regByHour = {};
-                        if (data.registrations) {
-                            $.each(data.registrations, function(index, hourGroup) {
-                                regByHour[hourGroup.numero_hora] = hourGroup;
-                            });
-                        }
-                        
-                        // Iterate over ALL hours from the structure (even empty ones)
-                        $.each(data.hours_structure, function(numHora, hourInfo) {
-                            var hourGroup = regByHour[numHora];
+                        $.each(data.registrations, function(index, hourGroup) {
                             scheduleHtml += '<div class="ho-hour-row">';
                             scheduleHtml += '<div class="ho-hour-header">';
-                            scheduleHtml += '<h4>' + hourInfo.label + '</h4>';
+                            scheduleHtml += '<h4>' + horasOracion.i18n.hourPrefix + ' ' + hourGroup.numero_hora + ' — ' + horasOracion.i18n.dayPrefix + ' ' + hourGroup.dia + ' — ' + hourGroup.hora + '</h4>';
                             scheduleHtml += '</div>';
                             
-                            if (hourGroup && hourGroup.participants && hourGroup.participants.length > 0) {
+                            if (hourGroup.participants && hourGroup.participants.length > 0) {
                                 scheduleHtml += '<ul class="ho-participants-list">';
                                 $.each(hourGroup.participants, function(i, participant) {
                                     scheduleHtml += '<li>';
@@ -183,7 +173,7 @@
                                 scheduleHtml += '</ul>';
                             } else {
                                 scheduleHtml += '<div class="ho-empty-hour" style="padding: 1.5rem; text-align: center; color: var(--ho-text-light); font-size: 0.9rem; font-style: italic;">';
-                                scheduleHtml += 'Aún no hay personas anotadas en esta hora. ¡Animate a ser la primera!';
+                                scheduleHtml += horasOracion.i18n.emptyHour;
                                 scheduleHtml += '</div>';
                             }
                             scheduleHtml += '</div>';

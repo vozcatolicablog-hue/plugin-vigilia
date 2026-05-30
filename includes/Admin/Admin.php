@@ -141,6 +141,16 @@ class Admin {
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce' => $this->security->create_nonce('horas_oracion_admin_nonce'),
             'confirmDelete' => __('¿Está seguro de que desea eliminar esta inscripción?', '40-horas-oracion'),
+            'i18n' => [
+                'deleting' => __('Eliminando...', '40-horas-oracion'),
+                'exporting' => __('Exportando...', '40-horas-oracion'),
+                'deleteError' => __('Error al eliminar el registro.', '40-horas-oracion'),
+                'exportSuccess' => __('CSV exportado correctamente.', '40-horas-oracion'),
+                'exportError' => __('Error al exportar CSV.', '40-horas-oracion'),
+                'deleteSuccess' => __('Registro eliminado correctamente.', '40-horas-oracion'),
+                'saveSuccess' => __('Configuración guardada correctamente.', '40-horas-oracion'),
+                'requestError' => __('Error al procesar la solicitud.', '40-horas-oracion'),
+            ]
         ]);
     }
     
@@ -383,14 +393,14 @@ class Admin {
         // Verify nonce
         if (!isset($_POST['nonce']) || !$this->security->verify_nonce($_POST['nonce'], 'horas_oracion_admin_nonce')) {
             wp_send_json_error([
-                'message' => 'Error de seguridad. Por favor recargue la página.'
+                'message' => __('Error de seguridad. Por favor recargue la página.', '40-horas-oracion')
             ]);
         }
         
         // Check capabilities
         if (!current_user_can('manage_options')) {
             wp_send_json_error([
-                'message' => 'No tiene permisos suficientes para realizar esta acción.'
+                'message' => __('No tiene permisos suficientes para realizar esta acción.', '40-horas-oracion')
             ]);
         }
         
@@ -398,7 +408,7 @@ class Admin {
         $id = isset($_POST['registration_id']) ? absint($_POST['registration_id']) : 0;
         if (!$id) {
             wp_send_json_error([
-                'message' => 'ID de registro inválido.'
+                'message' => __('ID de registro inválido.', '40-horas-oracion')
             ]);
         }
         
@@ -406,12 +416,12 @@ class Admin {
         $result = $this->database->delete_registration($id);
         if ($result === false) {
             wp_send_json_error([
-                'message' => 'No se pudo eliminar el registro.'
+                'message' => __('No se pudo eliminar el registro.', '40-horas-oracion')
             ]);
         }
         
         wp_send_json_success([
-            'message' => 'Registro eliminado correctamente.'
+            'message' => __('Registro eliminado correctamente.', '40-horas-oracion')
         ]);
     }
     
@@ -422,21 +432,21 @@ class Admin {
         // Verify nonce
         if (!isset($_POST['nonce']) || !$this->security->verify_nonce($_POST['nonce'], 'horas_oracion_admin_nonce')) {
             wp_send_json_error([
-                'message' => 'Error de seguridad. Por favor recargue la página.'
+                'message' => __('Error de seguridad. Por favor recargue la página.', '40-horas-oracion')
             ]);
         }
         
         // Check capabilities
         if (!current_user_can('manage_options')) {
             wp_send_json_error([
-                'message' => 'No tiene permisos suficientes para realizar esta acción.'
+                'message' => __('No tiene permisos suficientes para realizar esta acción.', '40-horas-oracion')
             ]);
         }
         
         $month_str = isset($_POST['month']) ? sanitize_text_field($_POST['month']) : '';
         if (empty($month_str)) {
             wp_send_json_error([
-                'message' => 'Mes no especificado.'
+                'message' => __('Mes no especificado.', '40-horas-oracion')
             ]);
         }
         
@@ -446,12 +456,12 @@ class Admin {
         
         if ($result === false) {
             wp_send_json_error([
-                'message' => 'No se pudo exportar el archivo CSV.'
+                'message' => __('No se pudo exportar el archivo CSV.', '40-horas-oracion')
             ]);
         }
         
         wp_send_json_success([
-            'message' => 'Archivo exportado correctamente.',
+            'message' => __('Archivo exportado correctamente.', '40-horas-oracion'),
             'file' => $result
         ]);
     }

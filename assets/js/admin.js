@@ -42,7 +42,7 @@
 
         btn.prop('disabled', true);
         const originalText = btn.text();
-        btn.text('Eliminando...');
+        btn.text(horasOracionAdmin.i18n.deleting);
 
         $.ajax({
             url: horasOracionAdmin.ajaxUrl,
@@ -67,7 +67,7 @@
                 }
             },
             error: function() {
-                showAdminNotice('Error al eliminar el registro.', 'error');
+                showAdminNotice(horasOracionAdmin.i18n.deleteError, 'error');
                 btn.prop('disabled', false).text(originalText);
             }
         });
@@ -81,7 +81,7 @@
         
         btn.prop('disabled', true);
         const originalText = btn.text();
-        btn.text('Exportando...');
+        btn.text(horasOracionAdmin.i18n.exporting);
 
         $.ajax({
             url: horasOracionAdmin.ajaxUrl,
@@ -94,7 +94,7 @@
             dataType: 'json',
             success: function(response) {
                 if (response.success) {
-                    showAdminNotice('CSV exportado correctamente.', 'success');
+                    showAdminNotice(horasOracionAdmin.i18n.exportSuccess, 'success');
                     btn.prop('disabled', false).text(originalText);
                 } else {
                     showAdminNotice(response.data.message, 'error');
@@ -102,7 +102,7 @@
                 }
             },
             error: function() {
-                showAdminNotice('Error al exportar CSV.', 'error');
+                showAdminNotice(horasOracionAdmin.i18n.exportError, 'error');
                 btn.prop('disabled', false).text(originalText);
             }
         });
@@ -145,19 +145,19 @@
      */
     function showNotices() {
         if (window.location.search.indexOf('deleted=1') !== -1) {
-            showAdminNotice('Registro eliminado correctamente.', 'success');
+            showAdminNotice(horasOracionAdmin.i18n.deleteSuccess, 'success');
         }
 
         if (window.location.search.indexOf('saved=1') !== -1) {
-            showAdminNotice('Configuración guardada correctamente.', 'success');
+            showAdminNotice(horasOracionAdmin.i18n.saveSuccess, 'success');
         }
 
         if (window.location.search.indexOf('exported=1') !== -1) {
-            showAdminNotice('CSV exportado correctamente.', 'success');
+            showAdminNotice(horasOracionAdmin.i18n.exportSuccess, 'success');
         }
 
         if (window.location.search.indexOf('error=1') !== -1) {
-            showAdminNotice('Error al procesar la solicitud.', 'error');
+            showAdminNotice(horasOracionAdmin.i18n.requestError, 'error');
         }
     }
 

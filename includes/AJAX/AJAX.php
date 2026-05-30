@@ -54,7 +54,7 @@ class AJAX {
         // Verify nonce
         if (!isset($_POST['nonce']) || !$this->security->verify_nonce($_POST['nonce'], 'horas_oracion_nonce')) {
             wp_send_json_error([
-                'message' => 'Error de seguridad. Por favor recargue la página.'
+                'message' => __('Error de seguridad. Por favor recargue la página.', '40-horas-oracion')
             ]);
         }
         
@@ -62,7 +62,7 @@ class AJAX {
         $ip_address = $this->security->get_client_ip();
         if (!$this->security->check_rate_limit($ip_address, 5, 3600)) {
             wp_send_json_error([
-                'message' => 'Ha excedido el límite de intentos. Por favor espere una hora.'
+                'message' => __('Ha excedido el límite de intentos. Por favor espere una hora.', '40-horas-oracion')
             ]);
         }
         
@@ -71,13 +71,13 @@ class AJAX {
         if ($captcha_type === 'recaptcha') {
             if (!isset($_POST['recaptcha_token']) || !$this->security->verify_recaptcha($_POST['recaptcha_token'])) {
                 wp_send_json_error([
-                    'message' => 'Error en la verificación CAPTCHA.'
+                    'message' => __('Error en la verificación CAPTCHA.', '40-horas-oracion')
                 ]);
             }
         } elseif ($captcha_type === 'turnstile') {
             if (!isset($_POST['turnstile_token']) || !$this->security->verify_turnstile($_POST['turnstile_token'])) {
                 wp_send_json_error([
-                    'message' => 'Error en la verificación CAPTCHA.'
+                    'message' => __('Error en la verificación CAPTCHA.', '40-horas-oracion')
                 ]);
             }
         }
@@ -107,7 +107,7 @@ class AJAX {
         
         if ($hour_data === null) {
             wp_send_json_error([
-                'message' => 'Horario inválido.'
+                'message' => __('Horario inválido.', '40-horas-oracion')
             ]);
         }
         
@@ -126,7 +126,7 @@ class AJAX {
             
             if ($limit > 0 && $current_count >= $limit) {
                 wp_send_json_error([
-                    'message' => 'Ese horario ya está completo.'
+                    'message' => __('Ese horario ya está completo.', '40-horas-oracion')
                 ]);
             }
         }
@@ -136,7 +136,7 @@ class AJAX {
         
         if ($result === false) {
             wp_send_json_error([
-                'message' => 'Error al guardar la inscripción. Por favor intente nuevamente.'
+                'message' => __('Error al guardar la inscripción. Por favor intente nuevamente.', '40-horas-oracion')
             ]);
         }
         
@@ -144,7 +144,7 @@ class AJAX {
         $this->security->reset_rate_limit($ip_address);
         
         wp_send_json_success([
-            'message' => 'Inscripción realizada correctamente.'
+            'message' => __('Inscripción realizada correctamente.', '40-horas-oracion')
         ]);
     }
     
@@ -153,76 +153,75 @@ class AJAX {
      */
     public function handle_get_registrations() {
         // Verify nonce
-        if (!isset($_POST['nonce']) || !$this->security->verify_nonce($_POST['nonce'], 'horas_oracion_nonce')) {
+        if (
+            !isset($_POST['nonce']) ||
+            !$this->security->verify_nonce($_POST['nonce'], 'horas_oracion_nonce')
+        ) {
             wp_send_json_error([
-                'message' => 'Error de seguridad.'
+                'message' => __('Error de seguridad.', '40-horas-oracion')
             ]);
         }
-        
-        // Get registrations grouped by hour
+
+        // Registros existentes
         $registrations = $this->database->get_registrations_grouped_by_hour();
-        
-        // Get counts
+
+        // Contadores
         $current_month_count = $this->database->get_current_month_count();
-        $historical_count = $this->database->get_historical_count();
-        
-        // Format registrations for output
+        $historical_count    = $this->database->get_historical_count();
+
+        // Obtener las 40 horas definidas en el sistema
+        $hours_structure_raw = Database::get_hours_structure();
+
+        // Crear estructura completa (40 horas vacías)
         $formatted = [];
+
+        foreach ($hours_structure_raw as $num => $hour) {
+            $formatted[$num] = [
+                'numero_hora' => (int) $num,
+                'dia'          => $hour['dia'],
+                'hora'         => $hour['hora'],
+                'participants' => []
+            ];
+        }
+
+        // Rellenar participantes donde existan
         foreach ($registrations as $hour_group) {
             $participants = [];
+
             foreach ($hour_group['participants'] as $participant) {
                 $created_at_formatted = '';
-                if (isset($participant->created_at)) {
-                    $created_at_formatted = wp_date('d \d\e F \d\e Y - H:i', strtotime($participant->created_at));
+
+                if (!empty($participant->created_at)) {
+                    $created_at_formatted = wp_date(
+                        'd/m/Y H:i',
+                        strtotime($participant->created_at)
+                    );
                 }
-                
+
                 $participants[] = [
-                    'nombre' => $this->security->esc($participant->nombre),
-                    'apellido' => $this->security->esc($participant->apellido),
-                    'ciudad' => $this->security->esc($participant->ciudad),
-                    'pais' => $this->security->esc($participant->pais),
+                    'nombre'     => $this->security->esc($participant->nombre),
+                    'apellido'   => $this->security->esc($participant->apellido),
+                    'ciudad'     => $this->security->esc($participant->ciudad),
+                    'pais'       => $this->security->esc($participant->pais),
                     'created_at' => $created_at_formatted
                 ];
             }
-            
-            $formatted[] = [
-                'numero_hora' => $hour_group['numero_hora'],
-                'dia' => $hour_group['dia'],
-                'hora' => $hour_group['hora'],
-                'participants' => $participants
-            ];
+
+            $numero_hora = (int) $hour_group['numero_hora'];
+
+            if (isset($formatted[$numero_hora])) {
+                $formatted[$numero_hora]['participants'] = $participants;
+            }
         }
-        
-        // Get hours structure with formatted labels so the frontend can render all hours
-        $hours_structure_raw = Database::get_hours_structure();
-        $start_day = (int) get_option('horas_oracion_start_day', 14);
-        $duration = (int) get_option('horas_oracion_duration_hours', 40);
-        
-        // Calculate target month (same logic as shortcode.php)
-        $end_day_approx = $start_day + ceil($duration / 24);
-        $current_day = (int) wp_date('j');
-        $target_timestamp = time();
-        if ($current_day > $end_day_approx) {
-            $target_timestamp = strtotime('first day of next month');
-        }
-        $target_month = wp_date('F', $target_timestamp);
-        $next_month = wp_date('F', strtotime('+1 month', $target_timestamp));
-        
-        $hours_structure = [];
-        foreach ($hours_structure_raw as $num => $hour) {
-            $month_name = ($hour['dia'] < $start_day) ? $next_month : $target_month;
-            $hours_structure[$num] = [
-                'dia' => $hour['dia'],
-                'hora' => $hour['hora'],
-                'label' => sprintf('Hora %d — %d de %s — %s', $num, $hour['dia'], $month_name, $hour['hora'])
-            ];
-        }
-        
+
+        // Reindexar para JSON limpio
+        $formatted = array_values($formatted);
+
+        // Mantener compatibilidad con el frontend actual
         wp_send_json_success([
-            'registrations' => $formatted,
-            'hours_structure' => $hours_structure,
-            'current_month_count' => $current_month_count,
-            'historical_count' => $historical_count
+            'registrations'      => $formatted,
+            'current_month_count'=> $current_month_count,
+            'historical_count'   => $historical_count
         ]);
     }
 }
